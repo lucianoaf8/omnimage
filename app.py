@@ -2,16 +2,13 @@
 from flask import Flask, render_template, jsonify, send_file, Response, stream_with_context, request
 from pathlib import Path
 import json
-import re
 from datetime import datetime
 import os
 import shutil
 import threading
 from flask_cors import CORS
-from src.utils.progress_utils import read_progress
-from src.core.pipeline import GenerationPipeline
-from src.core.models import model_registry
-import time, os
+from backend.src.utils.progress_utils import read_progress
+import time
 
 app = Flask(__name__)
 CORS(app)

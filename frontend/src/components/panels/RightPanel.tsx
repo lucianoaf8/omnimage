@@ -8,19 +8,36 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 export default function RightPanel() {
   const { images, setImages, selected, toggleSelect } = useAppState();
 
-  const { data: fetched = [], isLoading } = useQuery<ImageMeta[]>({
+  const {
+    data: fetched = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['images'],
     queryFn: apiService.getImages,
+    retry: false,
+    staleTime: 60_000,
   });
 
+  // sync store when fetched size changes
   useEffect(() => {
-    setImages(fetched);
-  }, [fetched, setImages]);
+    if (fetched.length !== images.length) {
+      setImages(fetched);
+    }
+  }, [fetched, images, setImages]);
 
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="h-full flex items-center justify-center text-sm text-[var(--text-secondary)]">
+        Failed to load images (API offline?)
       </div>
     );
   }
