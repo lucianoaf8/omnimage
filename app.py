@@ -104,6 +104,7 @@ def index():
 def api_images():
     """Get all generated images with metadata"""
     images = []
+    base_url = request.host_url.rstrip('/')  # absolute base URL
     
     if RAW_DIR.exists():
         for img_file in RAW_DIR.iterdir():
@@ -113,8 +114,8 @@ def api_images():
                 images.append({
                     'id': img_file.stem,
                     'filename': img_file.name,
-                    'url': f'/api/image/{img_file.name}',
-                    'thumbnail_url': f'/api/image/{img_file.name}',  # Same for now
+                    'url': f"{base_url}/api/image/{img_file.name}",
+                    'thumbnail_url': f"{base_url}/api/image/{img_file.name}",  # Same for now
                     'prompt_id': metadata['prompt_id'],
                     'model': metadata['model'],
                     'provider': metadata['provider'],

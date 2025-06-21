@@ -39,6 +39,10 @@ interface AppState {
   setImages: (images: ImageMeta[]) => void;
 
   selected: Set<string>;
+  /** Replace current selection with given id(s) */
+  setSelection: (ids: string | string[]) => void;
+
+  /** Toggle selection membership; primarily internal */
   toggleSelect: (id: string) => void;
   clearSelection: () => void;
 
@@ -57,6 +61,11 @@ export const useAppState = create<AppState>()(
     }),
 
     selected: new Set<string>(),
+    setSelection: (ids) => set((s) => {
+      const arr = Array.isArray(ids) ? ids : [ids];
+      s.selected = new Set(arr);
+    }),
+
     toggleSelect: (id) => set((s) => {
       if (s.selected.has(id)) s.selected.delete(id);
       else s.selected.add(id);

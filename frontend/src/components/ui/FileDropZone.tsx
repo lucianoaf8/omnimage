@@ -31,7 +31,7 @@ export default function FileDropZone(_props: Props) {
   return (
     <div
       {...getRootProps()}
-      className="border-2 border-dashed border-[var(--border)] rounded p-6 text-center flex flex-col items-center justify-center gap-3 hover:border-[var(--accent-blue)] cursor-pointer"
+      className="border-2 border-dashed border-[var(--border)] rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-4 hover:border-[var(--accent-blue)] cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02] hover:bg-[var(--bg-secondary)]"
     >
       <input {...getInputProps()} />
       {uploading ? (

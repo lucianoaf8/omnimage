@@ -34,7 +34,7 @@ export const useUiStore = create<UiStoreState>()(
       s.rightWidth = w;
     }),
 
-    collapsed: {},
+    collapsed: { left: false, right: false } as Record<string, boolean>,
     toggleCollapse: (key) => set((s) => {
       s.collapsed[key] = !s.collapsed[key];
     }),

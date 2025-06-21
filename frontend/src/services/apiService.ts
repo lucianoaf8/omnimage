@@ -47,6 +47,24 @@ export const apiService = {
     const res = await fetch(`${BASE_URL}/image/${filename}`, { method: 'DELETE' });
     return res.json();
   },
+  saveImage: async (imageId: string, imageData: Blob): Promise<{ success: boolean }> => {
+    const form = new FormData();
+    form.append('image', imageData);
+    const res = await fetch(`${BASE_URL}/image/${imageId}/save`, {
+      method: 'POST',
+      body: form,
+    });
+    return res.json();
+  },
+  saveCopyImage: async (imageId: string, imageData: Blob): Promise<{ success: boolean; filename: string }> => {
+    const form = new FormData();
+    form.append('image', imageData);
+    const res = await fetch(`${BASE_URL}/image/${imageId}/save-copy`, {
+      method: 'POST',
+      body: form,
+    });
+    return res.json();
+  },
   getStats: async (): Promise<StatsResponse> => {
     const res = await fetch(`${BASE_URL}/stats`);
     return res.json();

@@ -9,7 +9,7 @@ export default function Card({ children, className }: CardProps) {
   return (
     <div
       className={clsx(
-        'rounded border border-[var(--border)] bg-[var(--bg-secondary)] shadow-sm p-4',
+        'rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out p-6 backdrop-blur-sm',
         className
       )}
     >

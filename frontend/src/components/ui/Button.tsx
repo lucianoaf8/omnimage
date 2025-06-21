@@ -10,16 +10,16 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const base =
-  'inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none';
+  'inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:pointer-events-none hover:shadow-md';
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-[var(--accent-blue)] text-white hover:bg-opacity-90 shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-blue)]',
+    'bg-[var(--accent-blue)] text-white hover:bg-opacity-90 hover:scale-[1.02] shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-blue)]',
   secondary:
-    'bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-secondary)]',
+    'bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-secondary)] hover:border-[var(--accent-blue)] hover:scale-[1.02]',
   destructive:
-    'bg-red-600 text-white hover:bg-red-700',
-  ghost: 'bg-transparent hover:bg-[var(--selection)]',
+    'bg-red-600 text-white hover:bg-red-700 hover:scale-[1.02]',
+  ghost: 'bg-transparent hover:bg-[var(--selection)] rounded-full',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

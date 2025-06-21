@@ -48,3 +48,6 @@ tmp/
 temp/
 "@
 FOR_REFERENCE
+assets
+output/*
+CLAUDE.md

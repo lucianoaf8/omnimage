@@ -87,6 +87,8 @@ def list_images():
     upload_folder = Path(current_app.config["UPLOAD_FOLDER"])
     images: List[dict] = []
 
+    base_url = request.host_url.rstrip('/')  # e.g. http://localhost:5000
+
     if upload_folder.exists():
         for img_file in upload_folder.iterdir():
             if img_file.is_file() and img_file.suffix[1:].lower() in ALLOWED_EXTENSIONS:
@@ -95,8 +97,8 @@ def list_images():
                     {
                         "id": img_file.stem,
                         "filename": img_file.name,
-                        "url": f"/api/image/{img_file.name}",
-                        "thumbnail_url": f"/api/image/{img_file.name}",  # same for now
+                        "url": f"{base_url}/api/image/{img_file.name}",
+                        "thumbnail_url": f"{base_url}/api/image/{img_file.name}",  # same for now
                         **meta,
                     }
                 )
