@@ -34,21 +34,25 @@ export interface AnnotationLayerProps {
   imageNaturalWidth: number;
   imageNaturalHeight: number;
   onAnnotationsChange?: (annotations: Annotation[]) => void;
+  activeTool?: ToolType;
+  onToolChange?: (tool: ToolType) => void;
 }
 
 type ToolType = 'select' | 'ruler' | 'rectangle' | 'circle' | 'text' | 'arrow' | 'freehand';
 
-const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
+const AnnotationLayer = React.forwardRef<any, AnnotationLayerProps>(({
   transform,
   containerWidth,
   containerHeight,
   imageNaturalWidth,
   imageNaturalHeight,
-  onAnnotationsChange
-}) => {
+  onAnnotationsChange,
+  activeTool: externalActiveTool,
+  onToolChange: externalOnToolChange
+}, ref) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
-  const [activeTool, setActiveTool] = useState<ToolType>('select');
+  const [activeTool, setActiveTool] = useState<ToolType>(externalActiveTool || 'select');
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentAnnotation, setCurrentAnnotation] = useState<Annotation | null>(null);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
@@ -384,6 +388,12 @@ const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
     }
   }, [historyIndex, annotationHistory]);
 
+  // Handle tool changes
+  const handleToolChange = useCallback((tool: ToolType) => {
+    setActiveTool(tool);
+    externalOnToolChange?.(tool);
+  }, [externalOnToolChange]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -391,19 +401,19 @@ const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
 
       switch (e.key.toLowerCase()) {
         case 'r':
-          setActiveTool('ruler');
+          handleToolChange('ruler');
           break;
         case 't':
-          setActiveTool('text');
+          handleToolChange('text');
           break;
         case 'a':
-          setActiveTool('arrow');
+          handleToolChange('arrow');
           break;
         case 'f':
-          setActiveTool('freehand');
+          handleToolChange('freehand');
           break;
         case 'escape':
-          setActiveTool('select');
+          handleToolChange('select');
           setSelectedAnnotation(null);
           break;
         case 'delete':
@@ -427,120 +437,29 @@ const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedAnnotation, deleteSelectedAnnotation, undoAnnotation, redoAnnotation]);
+  }, [selectedAnnotation, deleteSelectedAnnotation, undoAnnotation, redoAnnotation, handleToolChange]);
 
   // Notify parent of annotation changes
   useEffect(() => {
     onAnnotationsChange?.(annotations);
   }, [annotations, onAnnotationsChange]);
 
+  // Expose annotation functions
+  React.useImperativeHandle(ref, () => ({
+    undoAnnotation,
+    redoAnnotation,
+    deleteSelectedAnnotation,
+    clearAllAnnotations,
+    canUndo: historyIndex >= 0,
+    canRedo: historyIndex < annotationHistory.length - 1,
+    hasSelection: !!selectedAnnotation,
+    hasAnnotations: annotations.length > 0,
+    activeTool,
+    setActiveTool: handleToolChange
+  }));
+
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* Toolbar */}
-      <div className="absolute top-4 right-4 flex flex-col gap-1 bg-black/70 backdrop-blur-md p-2 rounded-xl shadow-2xl text-white border border-white/20 pointer-events-auto">
-        <div className="flex gap-1">
-          <button
-            onClick={() => setActiveTool('select')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'select' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Select (Esc)"
-          >
-            ⌨️
-          </button>
-          <button
-            onClick={() => setActiveTool('ruler')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'ruler' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Ruler (R)"
-          >
-            📏
-          </button>
-          <button
-            onClick={() => setActiveTool('rectangle')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'rectangle' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Rectangle"
-          >
-            ▭
-          </button>
-          <button
-            onClick={() => setActiveTool('circle')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'circle' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Circle"
-          >
-            ○
-          </button>
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => setActiveTool('text')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'text' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Text (T)"
-          >
-            📝
-          </button>
-          <button
-            onClick={() => setActiveTool('arrow')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'arrow' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Arrow (A)"
-          >
-            ➡️
-          </button>
-          <button
-            onClick={() => setActiveTool('freehand')}
-            className={`px-2 py-1 rounded text-sm transition-all duration-200 ${
-              activeTool === 'freehand' ? 'bg-[var(--accent-blue)] text-white' : 'hover:bg-white/20'
-            }`}
-            title="Freehand (F)"
-          >
-            ✏️
-          </button>
-          <div className="w-px bg-white/30 mx-1"></div>
-          <button
-            onClick={undoAnnotation}
-            className="px-2 py-1 rounded text-sm hover:bg-white/20 transition-all duration-200"
-            title="Undo (Ctrl+Z)"
-            disabled={historyIndex < 0}
-          >
-            ↶
-          </button>
-          <button
-            onClick={redoAnnotation}
-            className="px-2 py-1 rounded text-sm hover:bg-white/20 transition-all duration-200"
-            title="Redo (Ctrl+Shift+Z)"
-            disabled={historyIndex >= annotationHistory.length - 1}
-          >
-            ↷
-          </button>
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={deleteSelectedAnnotation}
-            className="px-2 py-1 rounded text-sm hover:bg-red-500/80 transition-all duration-200"
-            title="Delete Selected (Del)"
-            disabled={!selectedAnnotation}
-          >
-            🗑️
-          </button>
-          <button
-            onClick={clearAllAnnotations}
-            className="px-2 py-1 rounded text-sm hover:bg-red-500/80 transition-all duration-200"
-            title="Clear All"
-            disabled={annotations.length === 0}
-          >
-            🗑️✨
-          </button>
-        </div>
-      </div>
 
       {/* SVG Overlay */}
       <svg
@@ -569,6 +488,8 @@ const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
       </svg>
     </div>
   );
-};
+});
+
+AnnotationLayer.displayName = 'AnnotationLayer';
 
 export default AnnotationLayer;

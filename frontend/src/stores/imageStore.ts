@@ -21,6 +21,9 @@ interface ImageStoreState {
   setHasModifications: (imageId: string, hasModifications: boolean) => void;
   getHasModifications: (imageId: string) => boolean;
   clearModifications: (imageId: string) => void;
+  
+  // Safe image selection with unsaved changes check
+  safeToggleSelect: (id: string, event?: { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean }, onUnsavedChanges?: (currentId: string, newId: string) => Promise<boolean>) => Promise<void>;
 }
 
 export const useImageStore = create<ImageStoreState>()(
@@ -167,5 +170,24 @@ export const useImageStore = create<ImageStoreState>()(
     clearModifications: (imageId) => set((s) => {
       s.modifications.delete(imageId);
     }),
+
+    // Safe image selection with unsaved changes check
+    safeToggleSelect: async (id, event, onUnsavedChanges) => {
+      const state = get();
+      const currentSelected = Array.from(state.selected)[0]; // Get first selected image
+      
+      // Check if current image has unsaved modifications
+      if (currentSelected && currentSelected !== id && state.modifications.get(currentSelected)) {
+        if (onUnsavedChanges) {
+          const shouldProceed = await onUnsavedChanges(currentSelected, id);
+          if (!shouldProceed) {
+            return; // Don't switch images
+          }
+        }
+      }
+      
+      // Proceed with normal selection
+      state.toggleSelect(id, event);
+    },
   }))
 );

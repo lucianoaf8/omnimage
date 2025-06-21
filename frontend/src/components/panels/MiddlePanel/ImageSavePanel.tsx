@@ -83,8 +83,8 @@ export default function ImageSavePanel({ onSave, onSaveCopy, onReset, hasModific
           variant="primary"
           size="sm"
           onClick={handleSave}
-          disabled={isSaving}
-          title="Save changes to original file"
+          disabled={isSaving || !hasModifications}
+          title={hasModifications ? "Save changes to original file" : "No changes to save"}
         >
           💾 Save Image
         </Button>
@@ -92,8 +92,8 @@ export default function ImageSavePanel({ onSave, onSaveCopy, onReset, hasModific
           variant="secondary"
           size="sm"
           onClick={handleSaveCopy}
-          disabled={isSaving}
-          title="Save as copy with _copy suffix"
+          disabled={isSaving || !hasModifications}
+          title={hasModifications ? "Save as copy with _copy suffix" : "No changes to save"}
         >
           📋 Save Copy
         </Button>
@@ -101,8 +101,8 @@ export default function ImageSavePanel({ onSave, onSaveCopy, onReset, hasModific
           variant="ghost"
           size="sm"
           onClick={onReset}
-          disabled={isSaving}
-          title="Discard all changes"
+          disabled={isSaving || !hasModifications}
+          title={hasModifications ? "Discard all changes" : "No changes to reset"}
         >
           🔄 Reset
         </Button>

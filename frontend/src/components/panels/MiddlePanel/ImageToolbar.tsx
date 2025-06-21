@@ -29,102 +29,111 @@ export default function ImageToolbar({
   hasModifications
 }: ImageToolbarProps) {
   return (
-    <div className="flex flex-wrap gap-2 p-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl">
-      {/* Transform Tools */}
-      <div className="flex gap-1">
-        <span className="text-xs text-[var(--text-secondary)] px-2 py-1 font-medium">Transform</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRotateLeft}
-          title="Rotate Left (L)"
-        >
-          ⟲
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRotateRight}
-          title="Rotate Right (R)"
-        >
-          ⟳
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onFlipHorizontal}
-          title="Flip Horizontal (H)"
-        >
-          ⇋
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onFlipVertical}
-          title="Flip Vertical (V)"
-        >
-          ⇵
-        </Button>
-      </div>
-
-      <div className="w-px h-6 bg-[var(--border)] my-auto"></div>
-
-      {/* Navigation Tools */}
-      <div className="flex gap-1">
-        <span className="text-xs text-[var(--text-secondary)] px-2 py-1 font-medium">View</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onFitToScreen}
-          title="Fit to Screen (0)"
-        >
-          ⤢
-        </Button>
-      </div>
-
-      <div className="w-px h-6 bg-[var(--border)] my-auto"></div>
-
-      {/* History Tools */}
-      <div className="flex gap-1">
-        <span className="text-xs text-[var(--text-secondary)] px-2 py-1 font-medium">History</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="Undo (Ctrl+Z)"
-        >
-          ↺
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="Redo (Ctrl+Y)"
-        >
-          ↻
-        </Button>
-      </div>
-
-      {hasModifications && (
-        <>
-          <div className="w-px h-6 bg-[var(--border)] my-auto"></div>
-          
-          {/* Reset Tool */}
-          <div className="flex gap-1">
-            <span className="text-xs text-[var(--text-secondary)] px-2 py-1 font-medium">Reset</span>
+    <div className="bg-[var(--bg-secondary)] border-b border-[var(--border)] px-6 py-3">
+      <div className="flex flex-wrap gap-6">
+        {/* Transform Tools */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold text-[var(--accent-blue)] uppercase tracking-wide">Transform</span>
+          <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={onReset}
-              title="Reset All Changes (Ctrl+R)"
+              onClick={onRotateLeft}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200"
             >
-              ⟲
+              <span className="text-lg">⟲</span>
+              <span className="text-sm">Rotate Left</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRotateRight}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200"
+            >
+              <span className="text-lg">⟳</span>
+              <span className="text-sm">Rotate Right</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onFlipHorizontal}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200"
+            >
+              <span className="text-lg">⇋</span>
+              <span className="text-sm">Flip H</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onFlipVertical}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200"
+            >
+              <span className="text-lg">⇵</span>
+              <span className="text-sm">Flip V</span>
             </Button>
           </div>
-        </>
-      )}
+        </div>
+
+        {/* Navigation Tools */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold text-[var(--accent-blue)] uppercase tracking-wide">View</span>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onFitToScreen}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200"
+            >
+              <span className="text-lg">⤢</span>
+              <span className="text-sm">Fit Screen</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* History Tools */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold text-[var(--accent-blue)] uppercase tracking-wide">History</span>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onUndo}
+              disabled={!canUndo}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-inherit"
+            >
+              <span className="text-lg">↺</span>
+              <span className="text-sm">Undo</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRedo}
+              disabled={!canRedo}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-blue)]/20 hover:text-[var(--accent-blue)] transition-all duration-200 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-inherit"
+            >
+              <span className="text-lg">↻</span>
+              <span className="text-sm">Redo</span>
+            </Button>
+          </div>
+        </div>
+
+        {hasModifications && (
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-[var(--accent-orange)] uppercase tracking-wide">Reset</span>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onReset}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--accent-orange)]/20 hover:text-[var(--accent-orange)] transition-all duration-200"
+              >
+                <span className="text-lg">⟲</span>
+                <span className="text-sm">Reset All</span>
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

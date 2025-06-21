@@ -84,12 +84,16 @@ export default function RightPanel() {
     }
   };
 
-  const handleDoubleClick = (imageId: string) => {
+  const handleDoubleClick = async (imageId: string) => {
     console.debug('RightPanel.handleDoubleClick', { imageId });
     // Clear current selection and select only the double-clicked image
     clearSelection();
-    const { toggleSelect } = useImageStore.getState();
-    toggleSelect(imageId, { ctrlKey: false, shiftKey: false });
+    const { safeToggleSelect } = useImageStore.getState();
+    await safeToggleSelect(imageId, { ctrlKey: false, shiftKey: false }, async (currentId: string, newId: string) => {
+      // For now, just return true to allow the switch - the MiddlePanel will handle the dialog
+      // This needs to be coordinated with MiddlePanel for proper UX
+      return true;
+    });
     setSelection(imageId);
   };
 
@@ -197,7 +201,10 @@ export default function RightPanel() {
             key={img.id}
             image={img}
             selected={storeSelected.has(img.id)}
-            onClick={() => {/* single click intentionally does nothing */}}
+            onClick={(e) => {
+              // Handle single click selection with keyboard modifiers
+              toggleSelect(img.id, e);
+            }}
             onDoubleClick={() => handleDoubleClick(img.id)}
           />
         ))}

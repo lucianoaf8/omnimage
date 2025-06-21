@@ -14,12 +14,16 @@ export interface ViewerTransform {
   flipY: boolean;
 }
 
+type ToolType = 'select' | 'ruler' | 'rectangle' | 'circle' | 'text' | 'arrow' | 'freehand';
+
 export interface ImageViewerProps {
   imageUrl?: string;
   alt?: string;
   onTransformChange?: (transform: ViewerTransform) => void;
   onAnnotationsChange?: (annotations: Annotation[]) => void;
   onModification?: () => void;
+  activeTool?: ToolType;
+  onToolChange?: (tool: ToolType) => void;
 }
 
 const MIN_ZOOM = 0.1; // 10%
@@ -27,7 +31,7 @@ const MAX_ZOOM = 10; // 1000%
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
-const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformChange, onAnnotationsChange, onModification }) => {
+const ImageViewer = React.forwardRef<any, ImageViewerProps>(({ imageUrl, alt, onTransformChange, onAnnotationsChange, onModification, activeTool, onToolChange }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,6 +47,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const annotationLayerRef = useRef<any>(null);
 
   // history stacks for undo/redo
   const [history, setHistory] = useState<ViewerTransform[]>([]);
@@ -127,8 +132,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
     // flips
     ctx.scale(transform.flipX ? -1 : 1, transform.flipY ? -1 : 1);
     ctx.translate(-img.naturalWidth / 2, -img.naturalHeight / 2);
-    if (transform.flipX) ctx.translate(-img.naturalWidth, 0);
-    if (transform.flipY) ctx.translate(0, -img.naturalHeight);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0);
@@ -467,7 +470,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
   }, [img, fitToScreen]);
 
   // Expose toolbar functions
-  React.useImperativeHandle(React.useRef(), () => ({
+  React.useImperativeHandle(ref, () => ({
     rotate,
     flipH,
     flipV,
@@ -495,7 +498,16 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
           resolve(blob);
         }, 'image/png');
       });
-    }
+    },
+    // Annotation functions
+    undoAnnotation: () => annotationLayerRef.current?.undoAnnotation(),
+    redoAnnotation: () => annotationLayerRef.current?.redoAnnotation(),
+    deleteSelectedAnnotation: () => annotationLayerRef.current?.deleteSelectedAnnotation(),
+    clearAllAnnotations: () => annotationLayerRef.current?.clearAllAnnotations(),
+    canUndoAnnotation: annotationLayerRef.current?.canUndo ?? false,
+    canRedoAnnotation: annotationLayerRef.current?.canRedo ?? false,
+    hasSelection: annotationLayerRef.current?.hasSelection ?? false,
+    hasAnnotations: annotationLayerRef.current?.hasAnnotations ?? false
   }));
 
   return (
@@ -512,12 +524,15 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
       {/* Annotation Layer */}
       {img && containerSize.width > 0 && containerSize.height > 0 && (
         <AnnotationLayer
+          ref={annotationLayerRef}
           transform={transform}
           containerWidth={containerSize.width}
           containerHeight={containerSize.height}
           imageNaturalWidth={img.naturalWidth}
           imageNaturalHeight={img.naturalHeight}
           onAnnotationsChange={onAnnotationsChange}
+          activeTool={activeTool}
+          onToolChange={onToolChange}
         />
       )}
       
@@ -533,6 +548,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, alt, onTransformCha
       <span className="sr-only">{alt}</span>
     </div>
   );
-};
+});
+
+ImageViewer.displayName = 'ImageViewer';
 
 export default ImageViewer;
