@@ -1,12 +1,15 @@
-"""Flask application factory for Omnimage Phase 2 backend.
-This minimal backend focuses only on image upload, listing and serving.
-Advanced AI-generation endpoints from the original `app.py` have **not** been
-ported – keeping the scope aligned with Phase 2 requirements.
+"""Flask application factory for Omnimage backend.
+Refactored from monolithic app.py to proper modular structure.
+Includes comprehensive API endpoints, error handling, and logging.
 """
 
 from pathlib import Path
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+
+# Import utilities
+from ..src.utils.logging_config import setup_logging
+from ..src.utils.error_handling import OmnimageError, handle_api_error
 
 
 def create_app() -> Flask:
@@ -21,6 +24,23 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
     CORS(app)  # Open CORS for local development (frontend dev server runs on a different port)
+    
+    # Setup logging
+    project_root = Path(__file__).resolve().parent.parent.parent  # omnimage root
+    setup_logging(project_root)
+    
+    # Register error handlers
+    @app.errorhandler(OmnimageError)
+    def handle_omnimage_error(error):
+        return handle_api_error(error)
+    
+    @app.errorhandler(404)
+    def handle_not_found(error):
+        return jsonify({'error': 'Resource not found', 'status_code': 404}), 404
+    
+    @app.errorhandler(500)
+    def handle_internal_error(error):
+        return jsonify({'error': 'Internal server error', 'status_code': 500}), 500
 
     # ---------------------------------------------------------------------
     # Folders
@@ -35,17 +55,14 @@ def create_app() -> Flask:
 
     # Store useful paths on the app config for easy access inside blueprints
     app.config.update(
-        PROJECT_ROOT=str(project_root),
+        PROJECT_ROOT=str(project_root.parent),  # Point to omnimage root
         UPLOAD_FOLDER=str(upload_dir),
         THUMBNAIL_FOLDER=str(thumbnail_dir),
         STATIC_FOLDER=str(static_dir),
     )
 
-    # ------------------------------------------------------------------
-    # Blueprints
-    # ------------------------------------------------------------------
-    from .routes.images import bp as images_bp  # noqa: E402  (local import to avoid circular deps)
-
+    # Register blueprints
+    from .routes.images import bp as images_bp
     app.register_blueprint(images_bp)
 
     # Simple health-check
